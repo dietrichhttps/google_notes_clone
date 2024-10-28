@@ -10,27 +10,27 @@
     android:paddingTop="12dp"
     android:paddingEnd="12dp"
     android:paddingBottom="5dp"
-    tools:context=".MainActivity">
+    tools:context=".NotesActivity">
 
     <TextView
         android:id="@+id/categoryTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Все заметки"
         android:textColor="@color/white"
         android:textSize="26sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Все заметки" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/numberOfNotes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="15 заметок"
         android:textColor="@android:color/darker_gray"
         android:textSize="13sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/categoryTitle"
-        tools:text="15 заметок" />
+        app:layout_constraintTop_toBottomOf="@id/categoryTitle" />
 
     <LinearLayout
         android:id="@+id/searchContainer"
@@ -54,7 +54,7 @@
 
         <EditText
             android:id="@+id/searchText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:background="@android:color/transparent"
@@ -65,78 +65,58 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/notes"
+        android:id="@+id/recyclerViewNotes"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:paddingBottom="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonNoteIcon"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@+id/buttonNotes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchContainer"
         tools:listitem="@layout/note_item" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
+        android:id="@+id/buttonAddNotes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="#2F79F6"
+        android:backgroundTint="@color/active"
         android:contentDescription="@null"
         app:fabCustomSize="40dp"
-        app:layout_constraintBottom_toTopOf="@id/buttonNoteIcon"
+        app:layout_constraintBottom_toTopOf="@id/buttonNotes"
         app:layout_constraintEnd_toEndOf="parent"
         app:shapeAppearanceOverlay="@style/fab_rounded"
         app:srcCompat="@android:drawable/ic_input_add" />
 
-    <ImageView
-        android:id="@+id/buttonNoteIcon"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_marginBottom="2dp"
-        android:contentDescription="@null"
-        android:paddingTop="2dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonNoteCaption"
-        app:layout_constraintEnd_toStartOf="@+id/buttonTaskIcon"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/notes"
-        tools:src="@drawable/button_note_active" />
-
     <TextView
-        android:id="@+id/buttonNoteCaption"
+        android:id="@+id/buttonNotes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_note_caption"
+        android:textColor="@color/inactive"
         android:textSize="11sp"
+        app:drawableTopCompat="@drawable/button_note_inactive"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/buttonNoteIcon"
-        app:layout_constraintStart_toStartOf="@id/buttonNoteIcon"
-        tools:textColor="#2E7AF1" />
+        app:layout_constraintEnd_toStartOf="@+id/buttonTasks"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
-        android:id="@+id/buttonTaskIcon"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_marginBottom="2dp"
-        android:contentDescription="@null"
-        android:paddingTop="2dp"
-        app:layout_constraintBottom_toTopOf="@id/buttonTaskCaption"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/buttonNoteIcon"
-        tools:src="@drawable/button_task_active" />
 
     <TextView
-        android:id="@+id/buttonTaskCaption"
+        android:id="@+id/buttonTasks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_task_caption"
+        android:textColor="@color/inactive"
         android:textSize="11sp"
+        app:drawableTopCompat="@drawable/button_task_inactive"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/buttonTaskIcon"
-        app:layout_constraintStart_toStartOf="@id/buttonTaskIcon"
-        tools:textColor="#2E7AF1" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/buttonNotes" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
