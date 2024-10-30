@@ -9,15 +9,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-
-import java.util.List;
 
 public class AddNoteActivity extends AppCompatActivity {
 
     private static final String TAG = "AddNoteActivity";
-    private static final String EXTRA_ADD_NOTE_TIME = "addNoteTime";
+    private static final String EXTRA_NOTE = "note";
 
     private ImageView buttonBack;
     private ImageView buttonBackward;
@@ -28,8 +25,8 @@ public class AddNoteActivity extends AppCompatActivity {
     private EditText inputText;
 
     private NotesAdapter notesAdapter;
-
     private AddNoteViewModel viewModel;
+    private Note note;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,31 +34,35 @@ public class AddNoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_note);
         viewModel = new ViewModelProvider(this).get(AddNoteViewModel.class);
         notesAdapter = new NotesAdapter();
+        note = (Note) getIntent().getSerializableExtra(EXTRA_NOTE);
+        observeViewModel();
         initViews();
         setupViews();
         setupClickListeners();
-        observeViewModel();
+
     }
 
     private void observeViewModel() {
     }
 
     private void setupViews() {
-        setupSaveButtonStatus();
-        setupNoteTitle();
-        noteDate.setText(getIntent().getStringExtra(EXTRA_ADD_NOTE_TIME));
+        if (note != null) {
+            noteTitle.setText(note.getTitle());
+            noteDate.setText(note.getFormattedDate());
+            inputText.setText(note.getText());
+        }
     }
 
     private void setupClickListeners() {
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Note note = new Note(
-                        noteTitle.getText().toString().trim(),
-                        noteDate.getText().toString().trim(),
-                        ""
-                );
-                viewModel.add(note);
+                if (!isNoteViewsEmpty() && note.getId() == 0) {
+                    setNoteTitleIfEmpty();
+                    note.setTitle(noteTitle.getText().toString().trim());
+                    note.setText(inputText.getText().toString().trim());
+                    viewModel.add(note);
+                }
                 finish();
             }
         });
@@ -83,28 +84,52 @@ public class AddNoteActivity extends AppCompatActivity {
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isNoteViewsEmpty()) {
+                    finish();
+                }
+                setupButtonsBackwardForwardSaveVisibility(false);
+                setNoteTitleIfEmpty();
+            }
+        });
 
+        noteTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setupButtonsBackwardForwardSaveVisibility(true);
+            }
+        });
+
+        inputText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setupButtonsBackwardForwardSaveVisibility(true);
             }
         });
     }
 
-    private void setupSaveButtonStatus() {
-        if (noteTitle.getText() == null || inputText.getText() == null) {
-            buttonSave.setClickable(false);
-            buttonSave.setAlpha(0.6f);
+    private void setupButtonsBackwardForwardSaveVisibility(boolean buttonSaveClicked) {
+        if (buttonSaveClicked) {
+            buttonSave.setVisibility(View.VISIBLE);
+            buttonBackward.setVisibility(View.VISIBLE);
+            buttonForward.setVisibility(View.VISIBLE);
         } else {
-            buttonSave.setClickable(true);
-            buttonSave.setFocusable(true);
-            buttonSave.setAlpha(1f);
+            buttonSave.setVisibility(View.GONE);
+            buttonBackward.setVisibility(View.GONE);
+            buttonForward.setVisibility(View.GONE);
         }
     }
 
-    private void setupNoteTitle() {
+    private void setNoteTitleIfEmpty() {
         String noteTitleString = noteTitle.getText().toString();
         String inputTextString = inputText.getText().toString();
         if (noteTitleString.isEmpty() && !inputTextString.isEmpty()) {
             noteTitle.setText(inputTextString);
         }
+    }
+
+    private boolean isNoteViewsEmpty() {
+        return noteTitle.getText().toString().isEmpty() &&
+                inputText.getText().toString().isEmpty();
     }
 
     private void initViews() {
@@ -117,9 +142,9 @@ public class AddNoteActivity extends AppCompatActivity {
         inputText = findViewById(R.id.inputText);
     }
 
-    public static Intent newIntent(Context context, String addNoteTime) {
+    public static Intent newIntent(Context context, Note note) {
         Intent intent = new Intent(context, AddNoteActivity.class);
-        intent.putExtra(EXTRA_ADD_NOTE_TIME, addNoteTime);
+        intent.putExtra(EXTRA_NOTE, note);
         return intent;
     }
 }

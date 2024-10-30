@@ -15,6 +15,9 @@ public interface NotesDao {
     @Query("SELECT * FROM notes")
     Single<List<Note>> getNotes();
 
+    @Query("SELECT * FROM notes WHERE id = :id")
+    Single<Note> getNote(int id);
+
     @Insert
     Completable add(Note note);
 

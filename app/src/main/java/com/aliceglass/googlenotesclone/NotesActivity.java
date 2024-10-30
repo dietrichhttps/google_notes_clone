@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -16,8 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.sql.Date;
+import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,8 +46,8 @@ public class NotesActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(NotesViewModel.class);
         notesAdapter = new NotesAdapter();
         initViews();
-        setupClickListeners();
         recyclerViewNotes.setAdapter(notesAdapter);
+        setupClickListeners();
         observeViewModel();
     }
 
@@ -56,43 +58,65 @@ public class NotesActivity extends AppCompatActivity {
                 notesAdapter.setNotes(notes);
             }
         });
+
+        viewModel.getNote().observe(this, new Observer<Note>() {
+            @Override
+            public void onChanged(Note noteFromDb) {
+                startActivity(AddNoteActivity.newIntent(
+                        NotesActivity.this, noteFromDb
+                ));
+            }
+        });
     }
 
     private void setupClickListeners() {
         buttonAddNotes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(AddNoteActivity.newIntent(
-                        NotesActivity.this, getAddNoteTime())
-                );
+                Note note = new Note("", new Date(), "");
+                startActivity(AddNoteActivity.newIntent(NotesActivity.this, note));
             }
         });
 
         buttonNotes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setupButtonColors(
-                        buttonNotes,
-                        buttonTasks,
-                        R.drawable.button_note_active,
-                        R.drawable.button_task_inactive,
-                        R.color.active,
-                        R.color.inactive
-                );
+//                setupButtonColors(
+//                        buttonNotes,
+//                        buttonTasks,
+//                        R.drawable.button_note_active,
+//                        R.drawable.button_task_inactive,
+//                        R.color.active,
+//                        R.color.inactive
+//                );
             }
         });
 
         buttonTasks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setupButtonColors(
-                        buttonTasks,
-                        buttonNotes,
-                        R.drawable.button_task_active,
-                        R.drawable.button_note_inactive,
-                        R.color.active,
-                        R.color.inactive
-                );
+//                setupButtonColors(
+//                        buttonTasks,
+//                        buttonNotes,
+//                        R.drawable.button_task_active,
+//                        R.drawable.button_note_inactive,
+//                        R.color.active,
+//                        R.color.inactive
+//                );
+                Toast.makeText(
+                        NotesActivity.this,
+                        "Этот раздел пока еще не готов",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+
+        notesAdapter.setOnNoteClickListener(new NotesAdapter.OnNoteClickListener() {
+            @Override
+            public void onNoteClick(Note note) {
+                if (note != null) {
+                    viewModel.getNote(note.getId());
+                }
             }
         });
     }
@@ -125,14 +149,6 @@ public class NotesActivity extends AppCompatActivity {
                 drawableInactiveResId,
                 null,
                 null);
-    }
-
-    private String getAddNoteTime() {
-        Calendar calendar = Calendar.getInstance();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        String formattedTime = String.format("%02d:%02d", hour, minute);
-        return "Сегодня " + formattedTime;
     }
 
     private void initViews() {

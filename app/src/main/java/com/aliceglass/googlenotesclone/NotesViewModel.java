@@ -21,6 +21,7 @@ public class NotesViewModel extends AndroidViewModel {
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private MutableLiveData<List<Note>> notes = new MutableLiveData<>();
+    private MutableLiveData<Note> note = new MutableLiveData<>();
 
     public NotesViewModel(@NonNull Application application) {
         super(application);
@@ -31,6 +32,10 @@ public class NotesViewModel extends AndroidViewModel {
         return notes;
     }
 
+    public LiveData<Note> getNote() {
+        return note;
+    }
+
     public void refreshNotes() {
         Disposable disposable = notesDao.getNotes()
                 .subscribeOn(Schedulers.io())
@@ -39,6 +44,19 @@ public class NotesViewModel extends AndroidViewModel {
                     @Override
                     public void accept(List<Note> notesFromDb) throws Throwable {
                         notes.setValue(notesFromDb);
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
+    public void getNote(int id) {
+        Disposable disposable = notesDao.getNote(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Note>() {
+                    @Override
+                    public void accept(Note noteFromDb) throws Throwable {
+                        note.setValue(noteFromDb);
                     }
                 });
         compositeDisposable.add(disposable);
