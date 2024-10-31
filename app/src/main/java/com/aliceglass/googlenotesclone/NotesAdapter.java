@@ -22,6 +22,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         notifyDataSetChanged();
     }
 
+    public Note getNote(int position) {
+        return notes.get(position);
+    }
+
     public void setOnNoteClickListener(OnNoteClickListener onNoteClickListener) {
         this.onNoteClickListener = onNoteClickListener;
     }

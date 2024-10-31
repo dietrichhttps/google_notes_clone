@@ -9,7 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+
+import java.util.List;
 
 public class AddNoteActivity extends AppCompatActivity {
 
@@ -24,22 +27,19 @@ public class AddNoteActivity extends AppCompatActivity {
     private TextView noteDate;
     private EditText inputText;
 
-    private NotesAdapter notesAdapter;
-    private AddNoteViewModel viewModel;
+    private NotesViewModel viewModel;
     private Note note;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_note);
-        viewModel = new ViewModelProvider(this).get(AddNoteViewModel.class);
-        notesAdapter = new NotesAdapter();
+        viewModel = new ViewModelProvider(this).get(NotesViewModel.class);
         note = (Note) getIntent().getSerializableExtra(EXTRA_NOTE);
-        observeViewModel();
         initViews();
         setupViews();
         setupClickListeners();
-
+        observeViewModel();
     }
 
     private void observeViewModel() {

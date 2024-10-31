@@ -12,6 +12,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -62,10 +63,29 @@ public class NotesViewModel extends AndroidViewModel {
         compositeDisposable.add(disposable);
     }
 
+    public void add(Note note) {
+        Disposable disposable = notesDao.add(note)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Throwable {
+//                        refreshNotes();
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
     public void remove(Note note) {
         Disposable disposable = notesDao.remove(note.getId())
                 .subscribeOn(Schedulers.io())
-                .subscribe();
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Throwable {
+                        refreshNotes();
+                    }
+                });
         compositeDisposable.add(disposable);
     }
 

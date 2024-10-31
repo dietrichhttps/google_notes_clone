@@ -1,17 +1,29 @@
 package com.aliceglass.googlenotesclone;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -47,6 +59,7 @@ public class NotesActivity extends AppCompatActivity {
         notesAdapter = new NotesAdapter();
         initViews();
         recyclerViewNotes.setAdapter(notesAdapter);
+        setupRecyclerViewNotes();
         setupClickListeners();
         observeViewModel();
     }
@@ -69,6 +82,103 @@ public class NotesActivity extends AppCompatActivity {
         });
     }
 
+    private void setupRecyclerViewNotes() {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
+                0, ItemTouchHelper.LEFT
+        ) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView,
+                                  @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+
+            @Override
+            public void onChildDraw(Canvas c,
+                                    RecyclerView recyclerView,
+                                    RecyclerView.ViewHolder viewHolder,
+                                    float dX,
+                                    float dY,
+                                    int actionState,
+                                    boolean isCurrentlyActive) {
+                View itemView = viewHolder.itemView;
+                Drawable icon = ContextCompat.getDrawable(
+                        NotesActivity.this, R.drawable.button_trash
+                );
+
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    if (dX < 0) { // Свайп влево
+                        float maxSwipeDistance = -itemView.getWidth() * 0.25f; // 25% ширины
+                        if (dX < maxSwipeDistance) {
+                            dX = maxSwipeDistance;
+                        }
+                    } else { // Свайп вправо
+                        // Вернем элемент на место, если он был сдвинут влево
+                        if (dX > itemView.getWidth() * 0.1f) { // Порог для возврата
+                            dX = 0; // Вернем элемент
+                        }
+                    }
+
+                    // Настройки для кнопки удаления (округлый фон и иконка)
+                    int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+                    int iconTop = itemView.getTop() + iconMargin;
+                    int iconBottom = iconTop + icon.getIntrinsicHeight();
+
+                    float buttonWidth = itemView.getWidth() * 0.2f;
+                    float circleCenterX = itemView.getRight() - buttonWidth / 2;
+                    float circleCenterY = itemView.getTop() + itemView.getHeight() / 2;
+                    float circleRadius = buttonWidth / 2.5f;
+
+                    Paint paint = new Paint();
+                    paint.setColor(Color.RED);
+
+                    // Рисуем красный круг только если сдвинут влево
+                    if (dX < 0) {
+                        c.drawCircle(circleCenterX, circleCenterY, circleRadius, paint);
+                        int iconLeft = (int) (circleCenterX - icon.getIntrinsicWidth() / 2);
+                        int iconRight = (int) (circleCenterX + icon.getIntrinsicWidth() / 2);
+                        icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                        icon.draw(c);
+                    }
+
+                    super.onChildDraw(c,
+                            recyclerView,
+                            viewHolder,
+                            dX,
+                            dY,
+                            actionState,
+                            isCurrentlyActive);
+                } else {
+                    super.onChildDraw(c,
+                            recyclerView,
+                            viewHolder,
+                            dX,
+                            dY,
+                            actionState,
+                            isCurrentlyActive);
+                }
+            }
+
+            @Override
+            public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
+                return 0.5f; // Вернет элемент, если не завершён полный свайп
+            }
+
+            @Override
+            public float getSwipeEscapeVelocity(float defaultValue) {
+                return defaultValue * 10; // Увеличим требуемую скорость для завершения свайпа
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(recyclerViewNotes);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     private void setupClickListeners() {
         buttonAddNotes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,6 +229,36 @@ public class NotesActivity extends AppCompatActivity {
                 }
             }
         });
+
+        GestureDetector gestureDetector = new GestureDetector(
+                NotesActivity.this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                float x = e.getX();
+                float y = e.getY();
+
+                for (int i = 0; i < recyclerViewNotes.getChildCount(); i++) {
+                    View noteItem = recyclerViewNotes.getChildAt(i);
+                    Log.d(TAG, "noteItem class: " + noteItem.getClass());
+                    RecyclerView.ViewHolder viewHolder = recyclerViewNotes.getChildViewHolder(noteItem);
+
+                    // Расчет границ кнопки
+                    float buttonLeft = noteItem.getRight() - noteItem.getWidth() * 0.2f; // 20% ширины
+                    float buttonRight = noteItem.getRight(); // Правая граница кнопки
+                    float buttonTop = noteItem.getTop();
+                    float buttonBottom = noteItem.getBottom();
+
+                    // Проверка нажатия на кнопку
+                    if (x >= buttonLeft && x <= buttonRight && y >= buttonTop && y <= buttonBottom) {
+                        Note note = notesAdapter.getNote(viewHolder.getAdapterPosition());
+                        showDeleteConfirmationDialog(note);
+                        return true; // Обработано
+                    }
+                }
+                return false; // Не обработано
+            }
+        });
+        recyclerViewNotes.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
     private void setupButtonColors(TextView buttonActive,
@@ -150,6 +290,36 @@ public class NotesActivity extends AppCompatActivity {
                 null,
                 null);
     }
+
+    private void showDeleteConfirmationDialog(final Note note) {
+        // Создаем AlertDialog.Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Удалить заметку?");
+        builder.setMessage("Вы уверены, что хотите удалить эту заметку?");
+
+        // Кнопка "Отмена"
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss(); // Закрываем диалог
+            }
+        });
+
+        // Кнопка "Удалить"
+        builder.setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Логика удаления заметки
+                viewModel.remove(note);
+                dialog.dismiss(); // Закрываем диалог
+            }
+        });
+
+        // Создаем и показываем диалог
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
 
     private void initViews() {
         categoryTitle = findViewById(R.id.categoryTitle);

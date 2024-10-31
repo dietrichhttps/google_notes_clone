@@ -1,6 +1,7 @@
 package com.aliceglass.googlenotesclone;
 
 import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -8,7 +9,6 @@ import androidx.room.TypeConverter;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @Entity(tableName = "notes")
 public class Note implements Serializable{
@@ -59,12 +59,20 @@ public class Note implements Serializable{
     }
 
     public String getFormattedDate() {
-        long now = System.currentTimeMillis();
-        long creationTime = creationDate.getTime();
+        Date currentDate = new Date();
 
-        if (TimeUnit.MILLISECONDS.toDays(now - creationTime) < 1) {
+        Calendar currentCalendar = Calendar.getInstance();
+        currentCalendar.setTime(currentDate);
+
+        Calendar creationCalendar = Calendar.getInstance();
+        creationCalendar.setTime(creationDate);
+
+        if (creationCalendar.get(Calendar.DAY_OF_YEAR) == currentCalendar.get(Calendar.DAY_OF_YEAR) &&
+                creationCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR)) {
+
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
             return "Сегодня " + timeFormat.format(creationDate);
+
         } else {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy 'г.'");
             return dateFormat.format(creationDate);
