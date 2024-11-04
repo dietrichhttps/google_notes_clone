@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GoogleNotesClone</string>
+    <string name="hint_search">Поиск заметок</string>
+    <string name="button_note_caption">Заметки</string>
+    <string name="button_task_caption">Задачи</string>
+    <string name="hint_title">Название</string>
+</resources>

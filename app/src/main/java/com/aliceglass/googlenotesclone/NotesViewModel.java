@@ -89,6 +89,19 @@ public class NotesViewModel extends AndroidViewModel {
         compositeDisposable.add(disposable);
     }
 
+    public void removeAll() {
+        Disposable disposable = notesDao.removeAll()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Throwable {
+                        refreshNotes();
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

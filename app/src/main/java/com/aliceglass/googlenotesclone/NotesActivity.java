@@ -48,7 +48,6 @@ public class NotesActivity extends AppCompatActivity {
     private TextView buttonTasks;
 
     private NotesAdapter notesAdapter;
-
     private NotesViewModel viewModel;
 
     @Override
@@ -66,9 +65,15 @@ public class NotesActivity extends AppCompatActivity {
 
     private void observeViewModel() {
         viewModel.getNotes().observe(this, new Observer<List<Note>>() {
+            @SuppressLint("DefaultLocale")
             @Override
             public void onChanged(List<Note> notes) {
                 notesAdapter.setNotes(notes);
+
+                int countNotes = notes.size();
+                numberOfNotes.setText(String.format(
+                        "%d %s", countNotes, getNoteAddition(countNotes)
+                ));
             }
         });
 
@@ -318,6 +323,27 @@ public class NotesActivity extends AppCompatActivity {
         // Создаем и показываем диалог
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    public String getNoteAddition(int num) {
+
+        int preLastDigit = num % 100 / 10;
+
+        if (preLastDigit == 1) {
+            return "заметок";
+        }
+
+        switch (num % 10) {
+            case 1:
+                return "заметка";
+            case 2:
+            case 3:
+            case 4:
+                return "заметки";
+            default:
+                return "заметок";
+        }
+
     }
 
 
