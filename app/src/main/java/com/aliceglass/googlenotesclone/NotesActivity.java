@@ -10,6 +10,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -57,10 +59,15 @@ public class NotesActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(NotesViewModel.class);
         notesAdapter = new NotesAdapter();
         initViews();
-        recyclerViewNotes.setAdapter(notesAdapter);
-        setupRecyclerViewNotes();
+        setupViews();
         setupClickListeners();
         observeViewModel();
+    }
+
+    private void setupViews() {
+        recyclerViewNotes.setAdapter(notesAdapter);
+        setupRecyclerViewNotes();
+        setupSearchText();
     }
 
     private void observeViewModel() {
@@ -181,6 +188,26 @@ public class NotesActivity extends AppCompatActivity {
             }
         });
         itemTouchHelper.attachToRecyclerView(recyclerViewNotes);
+    }
+
+    private void setupSearchText() {
+        searchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString();
+                viewModel.searchNote(query);
+            }
+        });
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -343,7 +370,6 @@ public class NotesActivity extends AppCompatActivity {
             default:
                 return "заметок";
         }
-
     }
 
 
@@ -361,5 +387,6 @@ public class NotesActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         viewModel.refreshNotes();
+        searchText.setText("");
     }
 }

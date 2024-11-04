@@ -50,6 +50,19 @@ public class NotesViewModel extends AndroidViewModel {
         compositeDisposable.add(disposable);
     }
 
+    public void searchNote(String query) {
+        Disposable disposable = notesDao.getNotes(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<Note>>() {
+                    @Override
+                    public void accept(List<Note> notesFromDb) throws Throwable {
+                        notes.setValue(notesFromDb);
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
     public void getNote(int id) {
         Disposable disposable = notesDao.getNote(id)
                 .subscribeOn(Schedulers.io())

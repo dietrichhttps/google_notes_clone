@@ -15,6 +15,9 @@ public interface NotesDao {
     @Query("SELECT * FROM notes")
     Single<List<Note>> getNotes();
 
+    @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%'")
+    Single<List<Note>> getNotes(String query);
+
     @Query("SELECT * FROM notes WHERE id = :id")
     Single<Note> getNote(int id);
 
